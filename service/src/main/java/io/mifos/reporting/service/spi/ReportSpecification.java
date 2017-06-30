@@ -13,22 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.mifos.reporting.service.internal.service;
+package io.mifos.reporting.service.spi;
 
-import io.mifos.reporting.service.ServiceConstants;
-import org.slf4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.stereotype.Service;
+import io.mifos.reporting.api.v1.domain.ReportDefinition;
+import io.mifos.reporting.api.v1.domain.ReportPage;
+import io.mifos.reporting.api.v1.domain.ReportRequest;
 
-@Service
-public class ReportingService {
+public interface ReportSpecification {
 
-  private final Logger logger;
+  ReportDefinition getReportDefinition();
 
-  @Autowired
-  public ReportingService(@Qualifier(ServiceConstants.LOGGER_NAME) final Logger logger) {
-    super();
-    this.logger = logger;
-  }
+  ReportPage generateReport(final ReportRequest reportRequest);
+
+  void validate(final ReportRequest reportRequest) throws IllegalArgumentException;
 }

@@ -42,9 +42,8 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
 @EnableServiceException
 @ComponentScan({
     "io.mifos.reporting.service.rest",
-    "io.mifos.reporting.service.internal.service",
-    "io.mifos.reporting.service.repository",
-    "io.mifos.reporting.service.internal.provider"
+    "io.mifos.reporting.service.internal",
+    "io.mifos.reporting.service.repository"
 })
 @EnableJpaRepositories({
     "io.mifos.reporting.service.repository"
