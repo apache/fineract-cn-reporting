@@ -17,6 +17,8 @@ package io.mifos.reporting.service;
 
 import io.mifos.anubis.config.EnableAnubis;
 import io.mifos.core.cassandra.config.EnableCassandra;
+import io.mifos.core.command.config.EnableCommandProcessing;
+import io.mifos.core.lang.config.EnableApplicationName;
 import io.mifos.core.lang.config.EnableServiceException;
 import io.mifos.core.lang.config.EnableTenantContext;
 import io.mifos.core.mariadb.config.EnableMariaDB;
@@ -34,6 +36,8 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
 @Configuration
 @EnableAutoConfiguration
 @EnableDiscoveryClient
+@EnableApplicationName
+@EnableCommandProcessing
 @EnableTenantContext
 @EnableCassandra
 @EnableMariaDB

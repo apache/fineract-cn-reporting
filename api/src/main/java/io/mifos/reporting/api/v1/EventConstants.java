@@ -21,4 +21,6 @@ public interface EventConstants {
   String DESTINATION = "reporting-v1";
   String SELECTOR_NAME = "operation";
 
+  String INITIALIZE = "initialize";
+  String SELECTOR_INITIALIZE = SELECTOR_NAME + " = '" + INITIALIZE + "'";
 }

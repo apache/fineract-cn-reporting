@@ -15,9 +15,15 @@
  */
 package io.mifos.reporting.service.rest;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import io.mifos.anubis.annotation.AcceptedTokenType;
 import io.mifos.anubis.annotation.Permittable;
+import io.mifos.core.lang.ApplicationName;
 import io.mifos.core.lang.ServiceException;
+import io.mifos.core.lang.TenantContextHolder;
+import io.mifos.core.lang.config.TenantHeaderFilter;
+import io.mifos.reporting.api.v1.EventConstants;
 import io.mifos.reporting.api.v1.PermittableGroupIds;
 import io.mifos.reporting.api.v1.domain.ReportDefinition;
 import io.mifos.reporting.api.v1.domain.ReportPage;
@@ -30,6 +36,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.jms.core.JmsTemplate;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -48,13 +55,19 @@ public class ReportingRestController {
 
   private final Logger logger;
   private final ReportSpecificationProvider reportSpecificationProvider;
+  private final ApplicationName applicationName;
+  private final JmsTemplate jmsTemplate;
 
   @Autowired
   public ReportingRestController(@Qualifier(ServiceConstants.LOGGER_NAME) final Logger logger,
-                                 final ReportSpecificationProvider reportSpecificationProvider) {
+                                 final ReportSpecificationProvider reportSpecificationProvider,
+                                 final ApplicationName applicationName,
+                                 final JmsTemplate jmsTemplate) {
     super();
     this.logger = logger;
     this.reportSpecificationProvider = reportSpecificationProvider;
+    this.applicationName = applicationName;
+    this.jmsTemplate = jmsTemplate;
   }
 
   @Permittable(value = AcceptedTokenType.SYSTEM)
@@ -67,6 +80,23 @@ public class ReportingRestController {
   public
   @ResponseBody
   ResponseEntity<Void> initialize() {
+    final Gson gson = new GsonBuilder().create();
+    this.jmsTemplate.convertAndSend(
+        gson.toJson(this.applicationName.getVersionString()),
+        message -> {
+          if (TenantContextHolder.identifier().isPresent()) {
+            message.setStringProperty(
+                TenantHeaderFilter.TENANT_HEADER,
+                TenantContextHolder.checkedGetIdentifier());
+          }
+          message.setStringProperty(
+              EventConstants.SELECTOR_NAME,
+              EventConstants.INITIALIZE
+          );
+          return message;
+        }
+    );
+
     return ResponseEntity.ok().build();
   }
 
