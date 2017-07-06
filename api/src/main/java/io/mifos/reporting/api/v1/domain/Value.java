@@ -17,19 +17,19 @@ package io.mifos.reporting.api.v1.domain;
 
 public class Value {
 
-  private String value;
+  private String[] values;
   private Type type;
 
   public Value() {
     super();
   }
 
-  public String getValue() {
-    return this.value;
+  public String[] getValues() {
+    return this.values;
   }
 
-  public void setValue(final String value) {
-    this.value = value;
+  public void setValues(final String[] values) {
+    this.values = values;
   }
 
   public Type getType() {

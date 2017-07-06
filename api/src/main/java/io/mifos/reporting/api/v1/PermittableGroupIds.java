@@ -17,6 +17,5 @@ package io.mifos.reporting.api.v1;
 
 @SuppressWarnings("unused")
 public interface PermittableGroupIds {
-  String SAMPLE_MANAGEMENT = "reporting__v1__samples";
-  String SELF_MANAGEMENT = "reporting__v1__self";
+  String REPORT_MANAGEMENT = "reporting__v1__general";
 }

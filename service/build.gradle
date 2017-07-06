@@ -38,7 +38,8 @@ dependencies {
             [group: 'io.mifos.core', name: 'cassandra', version: versions.frameworkcassandra],
             [group: 'io.mifos.core', name: 'mariadb', version: versions.frameworkmariadb],
             [group: 'io.mifos.core', name: 'command', version: versions.frameworkcommand],
-            [group: 'org.hibernate', name: 'hibernate-validator', version: versions.validator]
+            [group: 'org.hibernate', name: 'hibernate-validator', version: versions.validator],
+            [group: 'org.owasp.esapi', name: 'esapi', version: '2.1.0.1']
     )
 }
 

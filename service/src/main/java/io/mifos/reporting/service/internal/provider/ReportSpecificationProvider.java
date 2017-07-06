@@ -92,4 +92,16 @@ public class ReportSpecificationProvider implements ApplicationContextAware {
   private String buildKeyForSpecificationCache(final String category, final String identifier) {
     return category + "~" + identifier;
   }
+
+  public Optional<ReportDefinition> findReportDefinition(final String category, final String identifier) {
+    final List<ReportDefinition> reportDefinitions = this.reportCategoryCache.get(category);
+    if (reportDefinitions != null) {
+      return reportDefinitions
+          .stream()
+          .filter(reportDefinition -> reportDefinition.getIdentifier().equals(identifier))
+          .findAny();
+    } else {
+      return Optional.empty();
+    }
+  }
 }

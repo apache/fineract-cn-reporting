@@ -27,7 +27,6 @@ import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.web.servlet.config.annotation.PathMatchConfigurer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
@@ -42,11 +41,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
 @EnableServiceException
 @ComponentScan({
     "io.mifos.reporting.service.rest",
-    "io.mifos.reporting.service.internal",
-    "io.mifos.reporting.service.repository"
-})
-@EnableJpaRepositories({
-    "io.mifos.reporting.service.repository"
+    "io.mifos.reporting.service.internal"
 })
 public class ReportingConfiguration extends WebMvcConfigurerAdapter {
 

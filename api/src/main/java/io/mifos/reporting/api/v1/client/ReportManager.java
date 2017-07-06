@@ -18,12 +18,15 @@ package io.mifos.reporting.api.v1.client;
 import io.mifos.core.api.annotation.ThrowsException;
 import io.mifos.core.api.annotation.ThrowsExceptions;
 import io.mifos.core.api.util.CustomFeignClientsConfiguration;
+import io.mifos.core.lang.ServiceException;
+import io.mifos.reporting.api.v1.PermittableGroupIds;
 import io.mifos.reporting.api.v1.domain.ReportDefinition;
 import io.mifos.reporting.api.v1.domain.ReportPage;
 import io.mifos.reporting.api.v1.domain.ReportRequest;
 import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -69,4 +72,15 @@ public interface ReportManager {
                             @RequestBody final ReportRequest reportRequest,
                             @RequestParam(value = "pageIndex", required = false) final Integer pageIndex,
                             @RequestParam(value = "size", required = false) final Integer size);
+
+  @RequestMapping(
+      value = "categories/{category}/definitions/{identifier}",
+      method = RequestMethod.GET,
+      produces = MediaType.ALL_VALUE,
+      consumes = MediaType.APPLICATION_JSON_VALUE)
+  @ThrowsExceptions({
+      @ThrowsException(status = HttpStatus.NOT_FOUND, exception = ReportNotFoundException.class)
+  })
+  ReportDefinition findReportDefinition(@PathVariable("category") final String category,
+                                        @PathVariable("identifier") final String identifier);
 }

@@ -26,8 +26,7 @@ public class ReportPage {
   private Header header;
   private List<Row> rows;
   private Footer footer;
-  private Integer totalPages;
-  private Long totalElements;
+  private boolean hasMore;
 
   public ReportPage() {
     super();
@@ -89,19 +88,11 @@ public class ReportPage {
     this.footer = footer;
   }
 
-  public Integer getTotalPages() {
-    return this.totalPages;
+  public void setHasMore(final boolean hasMore) {
+    this.hasMore = hasMore;
   }
 
-  public void setTotalPages(final Integer totalPages) {
-    this.totalPages = totalPages;
-  }
-
-  public Long getTotalElements() {
-    return this.totalElements;
-  }
-
-  public void setTotalElements(final Long totalElements) {
-    this.totalElements = totalElements;
+  public boolean isHasMore() {
+    return hasMore;
   }
 }

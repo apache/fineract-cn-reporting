@@ -18,6 +18,7 @@ package io.mifos.reporting.service.rest;
 import io.mifos.anubis.annotation.AcceptedTokenType;
 import io.mifos.anubis.annotation.Permittable;
 import io.mifos.core.lang.ServiceException;
+import io.mifos.reporting.api.v1.PermittableGroupIds;
 import io.mifos.reporting.api.v1.domain.ReportDefinition;
 import io.mifos.reporting.api.v1.domain.ReportPage;
 import io.mifos.reporting.api.v1.domain.ReportRequest;
@@ -66,9 +67,10 @@ public class ReportingRestController {
   public
   @ResponseBody
   ResponseEntity<Void> initialize() {
-    return ResponseEntity.accepted().build();
+    return ResponseEntity.ok().build();
   }
 
+  @Permittable(value = AcceptedTokenType.TENANT, groupId = PermittableGroupIds.REPORT_MANAGEMENT)
   @RequestMapping(
       value = "/categories",
       method = RequestMethod.GET,
@@ -80,6 +82,7 @@ public class ReportingRestController {
     return ResponseEntity.ok(this.reportSpecificationProvider.getAvailableCategories());
   }
 
+  @Permittable(value = AcceptedTokenType.TENANT, groupId = PermittableGroupIds.REPORT_MANAGEMENT)
   @RequestMapping(
       value = "categories/{category}",
       method = RequestMethod.GET,
@@ -90,6 +93,7 @@ public class ReportingRestController {
     return ResponseEntity.ok(this.reportSpecificationProvider.getAvailableReports(category));
   }
 
+  @Permittable(value = AcceptedTokenType.TENANT, groupId = PermittableGroupIds.REPORT_MANAGEMENT)
   @RequestMapping(
       value = "/categories/{category}/reports/{identifier}",
       method = RequestMethod.POST,
@@ -114,9 +118,25 @@ public class ReportingRestController {
         throw ServiceException.badRequest(iaex.getMessage());
       }
 
-      return ResponseEntity.ok(reportSpecification.generateReport(reportRequest));
+      return ResponseEntity.ok(reportSpecification.generateReport(reportRequest, pageIndex, size));
     } else {
       throw ServiceException.notFound("Report {0} not found.", identifier);
     }
+  }
+
+  @Permittable(value = AcceptedTokenType.TENANT, groupId = PermittableGroupIds.REPORT_MANAGEMENT)
+  @RequestMapping(
+      value = "categories/{category}/definitions/{identifier}",
+      method = RequestMethod.GET,
+      produces = MediaType.APPLICATION_JSON_VALUE,
+      consumes = MediaType.ALL_VALUE)
+  public
+  ResponseEntity<ReportDefinition> findReportDefinition(
+      @PathVariable("category") final String category,
+      @PathVariable("identifier") final String identifier) {
+    return ResponseEntity.ok(
+        this.reportSpecificationProvider.findReportDefinition(category, identifier)
+            .orElseThrow(() -> ServiceException.notFound("Report definition {0} not found.", identifier))
+    );
   }
 }
