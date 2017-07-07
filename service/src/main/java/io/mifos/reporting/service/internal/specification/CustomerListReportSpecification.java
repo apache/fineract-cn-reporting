@@ -50,11 +50,22 @@ import java.util.stream.Collectors;
 @Report(category = "Customer", identifier = "Listing")
 public class CustomerListReportSpecification implements ReportSpecification {
 
+  private static final String DATE_RANGE = "Date range";
+  private static final String STATE = "State";
+  private static final String CUSTOMER = "Customer";
+  private static final String FIRST_NAME = "First name";
+  private static final String MIDDLE_NAME = "Middle name";
+  private static final String LAST_NAME = "Last name";
+  private static final String ACCOUNT_NUMBER = "Account number";
+  private static final String ADDRESS = "Address";
+
   private final Logger logger;
+
   private final EntityManager entityManager;
   private final HashMap<String, String> customerColumnMapping = new HashMap<>();
   private final HashMap<String, String> addressColumnMapping = new HashMap<>();
   private final HashMap<String, String> accountColumnMapping = new HashMap<>();
+  private final HashMap<String, String> allColumnMapping = new HashMap<>();
 
   @Autowired
   public CustomerListReportSpecification(@Qualifier(ServiceConstants.LOGGER_NAME) final Logger logger,
@@ -104,13 +115,13 @@ public class CustomerListReportSpecification implements ReportSpecification {
   public void validate(final ReportRequest reportRequest) throws IllegalArgumentException {
     final ArrayList<String> unknownFields =  new ArrayList<>();
     reportRequest.getQueryParameters().forEach(queryParameter -> {
-      if (!this.customerColumnMapping.keySet().contains(queryParameter.getName())) {
+      if (!this.allColumnMapping.keySet().contains(queryParameter.getName())) {
         unknownFields.add(queryParameter.getName());
       }
     });
 
     reportRequest.getDisplayableFields().forEach(displayableField -> {
-      if (!this.customerColumnMapping.keySet().contains(displayableField.getName())) {
+      if (!this.allColumnMapping.keySet().contains(displayableField.getName())) {
         unknownFields.add(displayableField.getName());
       }
     });
@@ -123,16 +134,20 @@ public class CustomerListReportSpecification implements ReportSpecification {
   }
 
   private void initializeMapping() {
-    this.customerColumnMapping.put("Date Range", "cst.created_on");
-    this.customerColumnMapping.put("State", "cst.current_state");
-    this.customerColumnMapping.put("Customer", "cst.identifier");
-    this.customerColumnMapping.put("First name", "cst.given_name");
-    this.customerColumnMapping.put("Middle Name", "cst.middle_name");
-    this.customerColumnMapping.put("Last Name", "cst.surname");
+    this.customerColumnMapping.put(DATE_RANGE, "cst.created_on");
+    this.customerColumnMapping.put(STATE, "cst.current_state");
+    this.customerColumnMapping.put(CUSTOMER, "cst.identifier");
+    this.customerColumnMapping.put(FIRST_NAME, "cst.given_name");
+    this.customerColumnMapping.put(MIDDLE_NAME, "cst.middle_name");
+    this.customerColumnMapping.put(LAST_NAME, "cst.surname");
 
-    this.accountColumnMapping.put("Account number", "acc.identifier, acc.balance");
+    this.accountColumnMapping.put(ACCOUNT_NUMBER, "acc.identifier, acc.balance");
 
-    this.addressColumnMapping.put("Address", "CONCAT(adr.street, ', ', adr.postal_code, ', ', adr.city)");
+    this.addressColumnMapping.put(ADDRESS, "CONCAT(adr.street, ', ', adr.postal_code, ', ', adr.city)");
+
+    this.allColumnMapping.putAll(customerColumnMapping);
+    this.allColumnMapping.putAll(accountColumnMapping);
+    this.allColumnMapping.putAll(addressColumnMapping);
   }
 
   private Header createHeader(final List<DisplayableField> displayableFields) {
@@ -152,15 +167,34 @@ public class CustomerListReportSpecification implements ReportSpecification {
     customerResultList.forEach(result -> {
       final Row row = new Row();
       row.setValues(new ArrayList<>());
-      final Object[] resultValues = (Object[]) result;
-      for (final Object resultValue : resultValues) {
+
+      final String customerIdentifier;
+
+      if (result instanceof Object[]) {
+        final Object[] resultValues = (Object[]) result;
+
+        customerIdentifier = resultValues[0].toString();
+
+        for (final Object resultValue : resultValues) {
+          final Value value = new Value();
+          if (resultValue != null) {
+            value.setValues(new String[]{resultValue.toString()});
+          } else {
+            value.setValues(new String[]{});
+          }
+
+          row.getValues().add(value);
+        }
+      } else {
+        customerIdentifier = result.toString();
+
         final Value value = new Value();
-        value.setValues(new String[]{resultValue.toString()});
+        value.setValues(new String[]{result.toString()});
         row.getValues().add(value);
       }
 
-      final DecimalFormat decimalFormat = new DecimalFormat(".##");
-      final Query accountQuery = this.entityManager.createNativeQuery(this.buildAccountQuery(reportRequest, resultValues[0].toString()));
+      final DecimalFormat decimalFormat = new DecimalFormat("0.##");
+      final Query accountQuery = this.entityManager.createNativeQuery(this.buildAccountQuery(reportRequest, customerIdentifier));
       final List<?> accountResultList = accountQuery.getResultList();
       final ArrayList<String> values = new ArrayList<>();
       accountResultList.forEach(accountResult -> {
@@ -175,7 +209,7 @@ public class CustomerListReportSpecification implements ReportSpecification {
       accountValue.setValues(values.toArray(new String[values.size()]));
       row.getValues().add(accountValue);
 
-      final String addressQueryString = this.buildAddressQuery(reportRequest, resultValues[0].toString());
+      final String addressQueryString = this.buildAddressQuery(reportRequest, customerIdentifier);
       if (addressQueryString != null) {
         final Query addressQuery = this.entityManager.createNativeQuery(addressQueryString);
         final List<?> resultList = addressQuery.getResultList();
@@ -192,19 +226,19 @@ public class CustomerListReportSpecification implements ReportSpecification {
 
   private List<QueryParameter> buildQueryParameters() {
     return Arrays.asList(
-        QueryParameterBuilder.create("Date range", Type.DATE).operator(QueryParameter.Operator.BETWEEN).build(),
-        QueryParameterBuilder.create("State", Type.TEXT).operator(QueryParameter.Operator.IN).build()
+        QueryParameterBuilder.create(DATE_RANGE, Type.DATE).operator(QueryParameter.Operator.BETWEEN).build(),
+        QueryParameterBuilder.create(STATE, Type.TEXT).operator(QueryParameter.Operator.IN).build()
     );
   }
 
   private List<DisplayableField> buildDisplayableFields() {
     return Arrays.asList(
-        DisplayableFieldBuilder.create("Customer", Type.TEXT).mandatory().build(),
-        DisplayableFieldBuilder.create("First name", Type.TEXT).build(),
-        DisplayableFieldBuilder.create("Middle name", Type.TEXT).build(),
-        DisplayableFieldBuilder.create("Last name", Type.TEXT).build(),
-        DisplayableFieldBuilder.create("Account number", Type.TEXT).mandatory().build(),
-        DisplayableFieldBuilder.create("Address", Type.TEXT).build()
+        DisplayableFieldBuilder.create(CUSTOMER, Type.TEXT).mandatory().build(),
+        DisplayableFieldBuilder.create(FIRST_NAME, Type.TEXT).build(),
+        DisplayableFieldBuilder.create(MIDDLE_NAME, Type.TEXT).build(),
+        DisplayableFieldBuilder.create(LAST_NAME, Type.TEXT).build(),
+        DisplayableFieldBuilder.create(ACCOUNT_NUMBER, Type.TEXT).mandatory().build(),
+        DisplayableFieldBuilder.create(ADDRESS, Type.TEXT).build()
     );
   }
 
@@ -228,9 +262,14 @@ public class CustomerListReportSpecification implements ReportSpecification {
     if (!queryParameters.isEmpty()) {
       query.append(" WHERE ");
       final ArrayList<String> criteria = new ArrayList<>();
-      queryParameters.forEach(queryParameter -> criteria.add(
-          CriteriaBuilder.buildCriteria(this.customerColumnMapping.get(queryParameter.getName()), queryParameter))
-      );
+      queryParameters.forEach(queryParameter -> {
+        if(queryParameter.getValue() != null && !queryParameter.getValue().isEmpty()) {
+          criteria.add(
+            CriteriaBuilder.buildCriteria(this.customerColumnMapping.get(queryParameter.getName()), queryParameter)
+          );
+        }
+      });
+
       query.append(criteria.stream().collect(Collectors.joining(" AND ")));
     }
     query.append(" ORDER BY cst.identifier");
@@ -275,10 +314,9 @@ public class CustomerListReportSpecification implements ReportSpecification {
 
     if (!columns.isEmpty()) {
       return "SELECT " + columns.stream().collect(Collectors.joining(", ")) + " " +
-          "FROM thoth_accounts acc " +
-              "LEFT JOIN maat_customers cst on acc.holders = cst.identifier " +
-          "WHERE cst.identifier ='" + customerIdentifier + "' " +
-          "ORDER BY acc.identifier";
+          "FROM maat_addresses adr " +
+              "LEFT JOIN maat_customers cst on adr.id = cst.address_id " +
+          "WHERE cst.identifier ='" + customerIdentifier + "' ";
     }
     return null;
   }
