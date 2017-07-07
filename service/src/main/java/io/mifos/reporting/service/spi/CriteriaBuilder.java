@@ -27,8 +27,18 @@ import java.util.stream.Collectors;
 public class CriteriaBuilder {
 
   // https://www.owasp.org/index.php/SQL_Injection_Prevention_Cheat_Sheet
-  private static final Encoder ENCODER = ESAPI.encoder();
-  private static final MySQLCodec MY_SQL_CODEC = new MySQLCodec(MySQLCodec.Mode.ANSI);
+  public static Encoder ENCODER;
+  public static MySQLCodec MY_SQL_CODEC;
+
+  static {
+    // TODO move this code into bean
+    try {
+      ENCODER = ESAPI.encoder();
+      MY_SQL_CODEC = new MySQLCodec(MySQLCodec.Mode.ANSI);
+    } catch(final Exception e) {
+      System.out.println(e.getMessage());
+    }
+  }
 
   private CriteriaBuilder() {
     super();
@@ -67,6 +77,7 @@ public class CriteriaBuilder {
                 .map(s -> "'" + CriteriaBuilder.ENCODER.encodeForSQL(CriteriaBuilder.MY_SQL_CODEC, s) + "'")
                 .collect(Collectors.joining(","))
         );
+        criteria.append(")");
         break;
       case BETWEEN:
         final String[] splitString = queryParameter.getValue().split("\\.\\.");
