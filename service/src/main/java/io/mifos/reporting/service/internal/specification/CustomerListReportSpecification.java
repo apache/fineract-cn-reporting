@@ -193,7 +193,7 @@ public class CustomerListReportSpecification implements ReportSpecification {
         row.getValues().add(value);
       }
 
-      final DecimalFormat decimalFormat = new DecimalFormat("0.##");
+      final DecimalFormat decimalFormat = new DecimalFormat("0.00");
       final Query accountQuery = this.entityManager.createNativeQuery(this.buildAccountQuery(reportRequest, customerIdentifier));
       final List<?> accountResultList = accountQuery.getResultList();
       final ArrayList<String> values = new ArrayList<>();
@@ -260,7 +260,6 @@ public class CustomerListReportSpecification implements ReportSpecification {
 
     final List<QueryParameter> queryParameters = reportRequest.getQueryParameters();
     if (!queryParameters.isEmpty()) {
-      query.append(" WHERE ");
       final ArrayList<String> criteria = new ArrayList<>();
       queryParameters.forEach(queryParameter -> {
         if(queryParameter.getValue() != null && !queryParameter.getValue().isEmpty()) {
@@ -270,7 +269,11 @@ public class CustomerListReportSpecification implements ReportSpecification {
         }
       });
 
-      query.append(criteria.stream().collect(Collectors.joining(" AND ")));
+      if (!criteria.isEmpty()) {
+        query.append(" WHERE ");
+        query.append(criteria.stream().collect(Collectors.joining(" AND ")));
+      }
+
     }
     query.append(" ORDER BY cst.identifier");
 
