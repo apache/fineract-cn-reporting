@@ -1,5 +1,7 @@
 package io.mifos.reporting.service.internal.specification;
 
+import io.mifos.core.api.util.UserContextHolder;
+import io.mifos.core.lang.DateConverter;
 import io.mifos.reporting.api.v1.domain.*;
 import io.mifos.reporting.service.ServiceConstants;
 import io.mifos.reporting.service.spi.*;
@@ -9,6 +11,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
 
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
+import java.time.Clock;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -75,11 +79,15 @@ public class SavingListReportSpecification implements ReportSpecification {
         final List<?> depositAccountResultList = depositAccountQuery.getResultList();
         reportPage.setRows(this.buildRows(reportRequest, depositAccountResultList));
 
-        return null;
-    }
 
-    private List<Row> buildRows(ReportRequest reportRequest, List<?> customerResultList) {
-        return null;
+        reportPage.setHasMore(
+                !this.entityManager.createNativeQuery(this.buildAccountQuery(reportRequest, pageIndex + 1, size))
+                        .getResultList().isEmpty()
+        );
+
+        reportPage.setGeneratedBy(UserContextHolder.checkedGetUser());
+        reportPage.setGeneratedOn(DateConverter.toIsoString(LocalDateTime.now(Clock.systemUTC())));
+        return reportPage;
     }
 
     private List<QueryParameter> buildQueryParameters() {
@@ -131,6 +139,77 @@ public class SavingListReportSpecification implements ReportSpecification {
         this.allColumnMapping.putAll(officeColumnMapping);
         this.allColumnMapping.putAll(employeeColumnMapping);
         this.allColumnMapping.putAll(accountColumnMapping);
+    }
+    private Header createHeader(final List<DisplayableField> displayableFields) {
+        final Header header = new Header();
+        header.setColumnNames(
+                displayableFields
+                        .stream()
+                        .map(DisplayableField::getName)
+                        .collect(Collectors.toList())
+        );
+        return header;
+    }
+
+
+    private List<Row> buildRows(final ReportRequest reportRequest, final List<?> depositAccountResultList) {
+        final ArrayList<Row> rows =new ArrayList<>();
+        depositAccountResultList.forEach(result -> {
+            final Row row = new Row();
+            row.setValues(new ArrayList<>());
+
+            final String customerIdentifier;
+
+            if (result instanceof Object[]) {
+                final Object[] resultValues = (Object[]) result;
+
+                customerIdentifier = resultValues[0].toString();
+
+                for (final Object resultValue : resultValues) {
+                    final Value value = new Value();
+                    if (resultValue != null) {
+                        value.setValues(new String[]{resultValue.toString()});
+                    } else {
+                        value.setValues(new String[]{});
+                    }
+
+                    row.getValues().add(value);
+                }
+            } else {
+
+                customerIdentifier = result.toString();
+                final Value value = new Value();
+                value.setValues(new String[]{result.toString()});
+                row.getValues().add(value);
+            }
+
+            final Query customerQuery = this.entityManager.createNativeQuery(this.buildCustomerQuery(reportRequest, customerIdentifier));
+            final List<?> accountResultList = customerQuery.getResultList();
+            final ArrayList<String> values = new ArrayList<>();
+            accountResultList.forEach(customerResult -> {
+                if (customerResult instanceof Object[]) {
+                    final Object[] customerResultValues = (Object[]) customerResult;
+                    final String customerValue = customerResultValues[0].toString();
+                    values.add(customerValue);
+                }
+            });
+            final Value customerValue = new Value();
+            customerValue.setValues(values.toArray(new String[values.size()]));
+            row.getValues().add(customerValue);
+
+            final String officeQueryString = this.buildOfficeQuery(reportRequest, customerIdentifier);
+            if (officeQueryString != null) {
+                final Query officeQuery = this.entityManager.createNativeQuery(officeQueryString);
+                final List<?> resultList = officeQuery.getResultList();
+                final Value officeValue = new Value();
+                officeValue.setValues(new String[]{resultList.get(0).toString()});
+                row.getValues().add(officeValue);
+            }
+
+            rows.add(row);
+        });
+
+        return rows;
     }
 
     private String buildAccountQuery(final ReportRequest reportRequest, int pageIndex, int size) {
@@ -215,19 +294,6 @@ public class SavingListReportSpecification implements ReportSpecification {
                 "WHERE cst.identifier ='" + customerIdentifier + "' " +
                 "ORDER BY cst.identifier";
     }
-
-
-    private Header createHeader(final List<DisplayableField> displayableFields) {
-        final Header header = new Header();
-        header.setColumnNames(
-                displayableFields
-                        .stream()
-                        .map(DisplayableField::getName)
-                        .collect(Collectors.toList())
-        );
-        return header;
-    }
-
 
     private List<DisplayableField> buildDisplayableFields() {
 
