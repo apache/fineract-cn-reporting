@@ -32,6 +32,7 @@ public class SavingListReportSpecification implements ReportSpecification {
     private static final String STATE = "State";
     private static final String OFFICE = "Office";
     private static final String DATE_RANGE = "Date created";
+    private static final String LAST_ACCOUNT_ACTIVITY = "Last account activity";
 
     private final EntityManager entityManager;
 
@@ -57,8 +58,8 @@ public class SavingListReportSpecification implements ReportSpecification {
 
         final ReportDefinition reportDefinition = new ReportDefinition();
         reportDefinition.setIdentifier("Listing");
-        reportDefinition.setName("Saving Listing");
-        reportDefinition.setDescription("List of all savings.");
+        reportDefinition.setName("Deposit Account Listing");
+        reportDefinition.setDescription("List of all deposit accounts.");
         reportDefinition.setQueryParameters(this.buildQueryParameters());
         reportDefinition.setDisplayableFields(this.buildDisplayableFields());
         return reportDefinition;
@@ -133,6 +134,7 @@ public class SavingListReportSpecification implements ReportSpecification {
         this.accountColumnMapping.put(ACCOUNT_NUMBER, "pi.customer_identifier, pi.account_identifier");
         this.accountColumnMapping.put(STATE, " pi.a_state");
         this.accountColumnMapping.put(ACCOUNT_TYPE, "pi.product_definition_id");
+        this.accountColumnMapping.put(LAST_ACCOUNT_ACTIVITY, "acc_entry.transaction_date, acc_entry.message, acc_entry.amount, acc_entry.balance");
         this.accountColumnMapping.put(DATE_RANGE, "pi.created_on");
 
         this.allColumnMapping.putAll(customerColumnMapping);
@@ -157,7 +159,7 @@ public class SavingListReportSpecification implements ReportSpecification {
         depositAccountResultList.forEach(result -> {
             final Row row = new Row();
             row.setValues(new ArrayList<>());
-
+            //Get the customer identifier to use for join queries.
             final String customerIdentifier;
 
             if (result instanceof Object[]) {
@@ -178,6 +180,31 @@ public class SavingListReportSpecification implements ReportSpecification {
             } else {
 
                 customerIdentifier = result.toString();
+                final Value value = new Value();
+                value.setValues(new String[]{result.toString()});
+                row.getValues().add(value);
+            }
+
+            final String accountIdentifier;
+
+            if (result instanceof Object[]) {
+                final Object[] resultValues = (Object[]) result;
+
+                accountIdentifier = resultValues[2].toString();
+
+                for (final Object resultValue : resultValues) {
+                    final Value value = new Value();
+                    if (resultValue != null) {
+                        value.setValues(new String[]{resultValue.toString()});
+                    } else {
+                        value.setValues(new String[]{});
+                    }
+
+                    row.getValues().add(value);
+                }
+            } else {
+
+                accountIdentifier = result.toString();
                 final Value value = new Value();
                 value.setValues(new String[]{result.toString()});
                 row.getValues().add(value);
@@ -206,6 +233,20 @@ public class SavingListReportSpecification implements ReportSpecification {
                 row.getValues().add(officeValue);
             }
 
+            final Query lastAccountActivivityQueryString = this.entityManager.createNativeQuery(this.buildLastAccountActivity(reportRequest, accountIdentifier));
+            final List<?> lastActivityResultList = lastAccountActivivityQueryString.getResultList();
+            final ArrayList<String> val = new ArrayList<>();
+            lastActivityResultList.forEach( lastActivityResult -> {
+                if (lastActivityResult instanceof Object[]){
+                    final Object[] lastActivityResultValues = (Object[]) lastActivityResult;
+                    final String lastActivityValue = lastActivityResultValues[1].toString();
+                    val.add(lastActivityValue);
+                }
+            });
+            final Value lastActivityValue = new Value();
+            lastActivityValue.setValues(val.toArray(new String[values.size()]));
+            row.getValues().add(lastActivityValue);
+            
             rows.add(row);
         });
 
@@ -295,6 +336,22 @@ public class SavingListReportSpecification implements ReportSpecification {
                 "ORDER BY cst.identifier";
     }
 
+    private String buildLastAccountActivity(final ReportRequest reportRequest, final String accountIdentifier){
+        final List<DisplayableField> displayableFields = new ArrayList<>();
+        final ArrayList<String> columns = new ArrayList<>();
+        displayableFields.forEach(displayableField -> {
+            final String column = this.accountColumnMapping.get(displayableField.getName());
+            if(column != null){
+                columns.add(column);
+            }
+        });
+
+        return "SELECT " + columns.stream().collect(Collectors.joining(",")) + ""  +
+                "FROM thoth_account_entries acc_entry" +
+                "WHERE acc_entry.account_id ='" + accountIdentifier + "'" +
+                "ORDER BY acc_entry.transaction_date";
+    }
+
     private List<DisplayableField> buildDisplayableFields() {
 
         return Arrays.asList(
@@ -303,6 +360,10 @@ public class SavingListReportSpecification implements ReportSpecification {
                 DisplayableFieldBuilder.create(MIDDLE_NAME, Type.TEXT).build(),
                 DisplayableFieldBuilder.create(LAST_NAME, Type.TEXT).build(),
                 DisplayableFieldBuilder.create(ACCOUNT_NUMBER, Type.TEXT).mandatory().build(),
+
+                DisplayableFieldBuilder.create(STATE,Type.TEXT).build(),
+                DisplayableFieldBuilder.create(LAST_ACCOUNT_ACTIVITY, Type.DATE).build(),
+
                 DisplayableFieldBuilder.create(EMPLOYEE, Type.TEXT).mandatory().build(),
                 DisplayableFieldBuilder.create(OFFICE, Type.TEXT).mandatory().build(),
                 DisplayableFieldBuilder.create(DATE_RANGE, Type.TEXT).build()
