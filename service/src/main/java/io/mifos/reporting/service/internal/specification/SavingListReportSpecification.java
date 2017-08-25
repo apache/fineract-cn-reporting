@@ -246,7 +246,7 @@ public class SavingListReportSpecification implements ReportSpecification {
             final Value lastActivityValue = new Value();
             lastActivityValue.setValues(val.toArray(new String[values.size()]));
             row.getValues().add(lastActivityValue);
-            
+
             rows.add(row);
         });
 
