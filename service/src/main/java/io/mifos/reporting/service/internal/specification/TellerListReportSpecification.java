@@ -4,9 +4,7 @@ import io.mifos.core.api.util.UserContextHolder;
 import io.mifos.core.lang.DateConverter;
 import io.mifos.reporting.api.v1.domain.*;
 import io.mifos.reporting.service.ServiceConstants;
-import io.mifos.reporting.service.spi.CriteriaBuilder;
-import io.mifos.reporting.service.spi.Report;
-import io.mifos.reporting.service.spi.ReportSpecification;
+import io.mifos.reporting.service.spi.*;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -16,6 +14,7 @@ import javax.persistence.Query;
 import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -23,16 +22,12 @@ import java.util.stream.Collectors;
 @Report(category = "Teller" , identifier = "Listing")
 public class TellerListReportSpecification implements ReportSpecification {
 
-   // private static final String TOTAL_CASH_ON_HAND = "Cash on hand";
-   // private static final String TOTAL_CASH_RECEIVED = "Cash received";
-   // private static final String TOTAL_CASH_DISBURSED = "Cash Disbursed";
-   // private static final String TOTAL_NEGOTIABLE_INSTRUMENT_RECEIVED = "Negotiable instrument received";
-   // private static final String TOTAL_CHEQUES_RECEIVED = "Total cheques received";
     private static final String TELLER = "Teller";
     private static final String EMPLOYEE = "Employee";
     private static final String OFFICE = "Office";
     private static final String CASHDRAW_LIMIT = "Cashdraw limit";
     private static final String STATE = "State";
+    private static final String DATE_RANGE = "Date";
 
     private final Logger logger;
 
@@ -51,16 +46,6 @@ public class TellerListReportSpecification implements ReportSpecification {
         this.initializeMapping();
     }
 
-    private void initializeMapping() {
-        this.tellerColumnMapping.put(TELLER, "tl.identifier");
-        this.tellerColumnMapping.put(OFFICE, "tl.office_identifier");
-        this.tellerColumnMapping.put(CASHDRAW_LIMIT, "tl.cashdraw_limit");
-        this.tellerColumnMapping.put(EMPLOYEE, "tl.assigned_employee_identifier");
-        this.tellerColumnMapping.put(STATE, "tl.a_state");
-
-        this.allColumnMapping.putAll(tellerColumnMapping);
-    }
-
     @Override
     public ReportDefinition getReportDefinition() {
         final ReportDefinition reportDefinition = new ReportDefinition();
@@ -70,14 +55,6 @@ public class TellerListReportSpecification implements ReportSpecification {
         reportDefinition.setQueryParameters(this.buildQueryParameters());
         reportDefinition.setDisplayableFields(this.buildDisplayableFields());
         return reportDefinition;
-    }
-
-    private List<DisplayableField> buildDisplayableFields() {
-        return null;
-    }
-
-    private List<QueryParameter> buildQueryParameters() {
-        return null;
     }
 
     @Override
@@ -102,6 +79,99 @@ public class TellerListReportSpecification implements ReportSpecification {
         reportPage.setGeneratedBy(UserContextHolder.checkedGetUser());
         reportPage.setGeneratedOn(DateConverter.toIsoString(LocalDateTime.now(Clock.systemUTC())));
         return reportPage;
+    }
+
+    @Override
+    public void validate(final ReportRequest reportRequest) throws IllegalArgumentException {
+        final ArrayList<String> unknownFields =  new ArrayList<>();
+        reportRequest.getQueryParameters().forEach(queryParameter -> {
+            if (!this.allColumnMapping.keySet().contains(queryParameter.getName())) {
+                unknownFields.add(queryParameter.getName());
+            }
+        });
+
+        reportRequest.getDisplayableFields().forEach(displayableField -> {
+            if (!this.allColumnMapping.keySet().contains(displayableField.getName())) {
+                unknownFields.add(displayableField.getName());
+            }
+        });
+
+        if (!unknownFields.isEmpty()) {
+            throw new IllegalArgumentException(
+                    "Unspecified fields requested: " + unknownFields.stream().collect(Collectors.joining(", "))
+            );
+        }
+    }
+
+    private void initializeMapping() {
+        this.tellerColumnMapping.put(TELLER, "tl.identifier");
+        this.tellerColumnMapping.put(OFFICE, "tl.office_identifier");
+        this.tellerColumnMapping.put(CASHDRAW_LIMIT, "tl.cashdraw_limit");
+        this.tellerColumnMapping.put(EMPLOYEE, "tl.assigned_employee_identifier");
+        this.tellerColumnMapping.put(STATE, "tl.a_state");
+        this.tellerColumnMapping.put(DATE_RANGE, "tl.created_on");
+
+        this.allColumnMapping.putAll(tellerColumnMapping);
+    }
+
+    private Header createHeader(List<DisplayableField> displayableFields) {
+        final Header header = new Header();
+        header.setColumnNames(
+                displayableFields
+                        .stream()
+                        .map(DisplayableField::getName)
+                        .collect(Collectors.toList())
+        );
+        return header;
+    }
+
+    private List<Row> buildRows(ReportRequest reportRequest, List<?> tellerResultList) {
+        final ArrayList<Row> rows = new ArrayList<>();
+        tellerResultList.forEach(result -> {
+            final Row row = new Row();
+            row.setValues(new ArrayList<>());
+            
+            if (result instanceof Object[]) {
+                final Object[] resultValues = (Object[]) result;
+
+                for(final Object resultVal : resultValues) {
+                    final Value val;
+                    val = new Value();
+
+                    if (resultVal != null) {
+                        val.setValues(new String[]{resultVal.toString()});
+                    } else {
+                        val.setValues(new String[]{});
+                    }
+
+                    row.getValues().add(val);
+                }
+            } else {
+                final Value value = new Value();
+                value.setValues(new String[]{result.toString()});
+                row.getValues().add(value);
+            }
+            rows.add(row);
+        });
+
+        return rows;
+    }
+
+    private List<QueryParameter> buildQueryParameters() {
+        return Arrays.asList(
+                QueryParameterBuilder.create(DATE_RANGE, Type.DATE).operator(QueryParameter.Operator.BETWEEN).build(),
+                QueryParameterBuilder.create(STATE, Type.TEXT).operator(QueryParameter.Operator.IN).build()
+        );
+    }
+
+    private List<DisplayableField> buildDisplayableFields() {
+        return Arrays.asList(
+                DisplayableFieldBuilder.create(TELLER, Type.TEXT).mandatory().build(),
+                DisplayableFieldBuilder.create(OFFICE, Type.TEXT).build(),
+                DisplayableFieldBuilder.create(EMPLOYEE, Type.TEXT).build(),
+                DisplayableFieldBuilder.create(CASHDRAW_LIMIT, Type.TEXT).build(),
+                DisplayableFieldBuilder.create(STATE, Type.TEXT).build()
+        );
     }
 
     private String buildTellerQuery(ReportRequest reportRequest, int pageIndex, int size) {
@@ -148,25 +218,4 @@ public class TellerListReportSpecification implements ReportSpecification {
 
         return query.toString();
     }
-
-    private List<Row> buildRows(ReportRequest reportRequest, List<?> tellerResultList) {
-    return null;
-    }
-
-    private Header createHeader(List<DisplayableField> displayableFields) {
-        final Header header = new Header();
-        header.setColumnNames(
-                displayableFields
-                        .stream()
-                        .map(DisplayableField::getName)
-                        .collect(Collectors.toList())
-        );
-        return header;
-    }
-
-    @Override
-    public void validate(ReportRequest reportRequest) throws IllegalArgumentException {
-
-    }
-    
 }
