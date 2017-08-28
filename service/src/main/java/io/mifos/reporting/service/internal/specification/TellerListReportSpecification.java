@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Report(category = "Teller" , identifier = "Listing")
-public class TellerListingReportSpecification implements ReportSpecification {
+public class TellerListReportSpecification implements ReportSpecification {
 
    // private static final String TOTAL_CASH_ON_HAND = "Cash on hand";
    // private static final String TOTAL_CASH_RECEIVED = "Cash received";
@@ -43,8 +43,8 @@ public class TellerListingReportSpecification implements ReportSpecification {
 
 
     @Autowired
-    public TellerListingReportSpecification(@Qualifier(ServiceConstants.LOGGER_NAME) final Logger logger,
-                                                        final EntityManager entityManager) {
+    public TellerListReportSpecification(@Qualifier(ServiceConstants.LOGGER_NAME) final Logger logger,
+                                         final EntityManager entityManager) {
         super();
         this.logger = logger;
         this.entityManager = entityManager;
