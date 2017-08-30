@@ -169,9 +169,9 @@ public class SavingListReportSpecification implements ReportSpecification {
 
                 for (final Object resultValue : resultValues) {
                     final Value value = new Value();
-                    if (resultValue != null) {
+                    if (resultValue != null)
                         value.setValues(new String[]{resultValue.toString()});
-                    } else {
+                    else {
                         value.setValues(new String[]{});
                     }
 
@@ -180,7 +180,8 @@ public class SavingListReportSpecification implements ReportSpecification {
             } else {
 
                 customerIdentifier = result.toString();
-                final Value value = new Value();
+                final Value value;
+                value = new Value();
                 value.setValues(new String[]{result.toString()});
                 row.getValues().add(value);
             }
@@ -193,10 +194,11 @@ public class SavingListReportSpecification implements ReportSpecification {
                 accountIdentifier = resultValues[2].toString();
 
                 for (final Object resultValue : resultValues) {
-                    final Value value = new Value();
-                    if (resultValue != null) {
+                    final Value value;
+                    value = new Value();
+                    if (resultValue != null)
                         value.setValues(new String[]{resultValue.toString()});
-                    } else {
+                    else {
                         value.setValues(new String[]{});
                     }
 
@@ -226,7 +228,8 @@ public class SavingListReportSpecification implements ReportSpecification {
 
             final String officeQueryString = this.buildOfficeQuery(reportRequest, customerIdentifier);
             if (officeQueryString != null) {
-                final Query officeQuery = this.entityManager.createNativeQuery(officeQueryString);
+                final Query officeQuery;
+                officeQuery = this.entityManager.createNativeQuery(officeQueryString);
                 final List<?> resultList = officeQuery.getResultList();
                 final Value officeValue = new Value();
                 officeValue.setValues(new String[]{resultList.get(0).toString()});
