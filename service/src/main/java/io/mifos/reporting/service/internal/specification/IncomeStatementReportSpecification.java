@@ -125,8 +125,35 @@ public class IncomeStatementReportSpecification implements ReportSpecification {
         return header;
     }
 
-    private List<Row> buildRows(ReportRequest reportRequest, List<?> customerResultList) {
-        return null;
+    private List<Row> buildRows(ReportRequest reportRequest, List<?> accountResultList) {
+        final ArrayList<Row> rows = new ArrayList<>();
+        accountResultList.forEach(result -> {
+            final Row row = new Row();
+            row.setValues(new ArrayList<>());
+
+            if (result instanceof Object[]) {
+                final Object[] resultValues;
+                resultValues = (Object[]) result;
+
+                for(final Object resultVal : resultValues) {
+                    final Value val;
+                    val = new Value();
+
+                    if (resultVal != null) {
+                        val.setValues(new String[]{resultVal.toString()});
+                    } else val.setValues(new String[]{});
+                    
+                    row.getValues().add(val);
+                }
+            } else {
+                final Value value = new Value();
+                value.setValues(new String[]{result.toString()});
+                row.getValues().add(value);
+            }
+            rows.add(row);
+        });
+
+        return rows;
     }
 
     private String buildAccountQuery(ReportRequest reportRequest, int pageIndex, int size) {

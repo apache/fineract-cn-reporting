@@ -255,8 +255,7 @@ public class DepositListReportSpecification implements ReportSpecification {
         final List<DisplayableField> displayableFields = reportRequest.getDisplayableFields();
         final ArrayList<String> columns = new ArrayList<>();
         displayableFields.forEach(displayableField -> {
-            final String column = this.accountColumnMapping.get(displayableField.getName())
-                    + this.employeeColumnMapping.get(displayableField.getName());
+            final String column = this.accountColumnMapping.get(displayableField.getName());
             if (column != null) {
                 columns.add(column);
             }
@@ -264,7 +263,7 @@ public class DepositListReportSpecification implements ReportSpecification {
 
         query.append(columns.stream().collect(Collectors.joining(", ")))
                 .append(" FROM ")
-                .append("shed_product_instances pi ");
+                .append("shed_product_instances pi");
         final List<QueryParameter> queryParameters = reportRequest.getQueryParameters();
         if (!queryParameters.isEmpty()) {
             final ArrayList<String> criteria = new ArrayList<>();
