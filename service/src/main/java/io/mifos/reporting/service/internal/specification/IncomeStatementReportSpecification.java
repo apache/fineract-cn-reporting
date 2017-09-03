@@ -177,11 +177,11 @@ public class IncomeStatementReportSpecification implements ReportSpecification {
     private List<DisplayableField> buildDisplayableFields() {
         return Arrays.asList(
                 DisplayableFieldBuilder.create(TYPE, Type.TEXT).build(),
-                DisplayableFieldBuilder.create(IDENTIFIER, Type.TEXT).build(),
-                DisplayableFieldBuilder.create(NAME, Type.TEXT).build(),
+                DisplayableFieldBuilder.create(IDENTIFIER, Type.TEXT).mandatory().build(),
+                DisplayableFieldBuilder.create(NAME, Type.TEXT).mandatory().build(),
                 DisplayableFieldBuilder.create(HOLDER, Type.TEXT).build(),
-                DisplayableFieldBuilder.create(BALANCE, Type.TEXT).build(),
-                DisplayableFieldBuilder.create(STATE, Type.TEXT).build()
+                DisplayableFieldBuilder.create(BALANCE, Type.TEXT).mandatory().build(),
+                DisplayableFieldBuilder.create(STATE, Type.TEXT).mandatory().build()
         );
     }
 

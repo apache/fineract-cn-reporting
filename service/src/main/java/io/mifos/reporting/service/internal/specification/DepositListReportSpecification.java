@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Report(category = "Deposit", identifier = "Listing")
-public class SavingListReportSpecification implements ReportSpecification {
+public class DepositListReportSpecification implements ReportSpecification {
 
     private static final String CUSTOMER = "Customer";
     private static final String FIRST_NAME = "First name";
@@ -46,7 +46,7 @@ public class SavingListReportSpecification implements ReportSpecification {
 
 
     @Autowired
-    public SavingListReportSpecification(@Qualifier(ServiceConstants.LOGGER_NAME) final Logger logger, final EntityManager entityManager) {
+    public DepositListReportSpecification(@Qualifier(ServiceConstants.LOGGER_NAME) final Logger logger, final EntityManager entityManager) {
         this.entityManager = entityManager;
         this.logger = logger;
         this.initializeMapping();
@@ -89,13 +89,6 @@ public class SavingListReportSpecification implements ReportSpecification {
         reportPage.setGeneratedBy(UserContextHolder.checkedGetUser());
         reportPage.setGeneratedOn(DateConverter.toIsoString(LocalDateTime.now(Clock.systemUTC())));
         return reportPage;
-    }
-
-    private List<QueryParameter> buildQueryParameters() {
-        return Arrays.asList(
-                QueryParameterBuilder.create(DATE_RANGE, Type.DATE).operator(QueryParameter.Operator.BETWEEN).build(),
-                QueryParameterBuilder.create(STATE, Type.TEXT).operator(QueryParameter.Operator.IN).build()
-        );
     }
 
     @Override
@@ -367,11 +360,18 @@ public class SavingListReportSpecification implements ReportSpecification {
                 DisplayableFieldBuilder.create(STATE,Type.TEXT).build(),
                 DisplayableFieldBuilder.create(LAST_ACCOUNT_ACTIVITY, Type.DATE).build(),
 
-                DisplayableFieldBuilder.create(EMPLOYEE, Type.TEXT).mandatory().build(),
-                DisplayableFieldBuilder.create(OFFICE, Type.TEXT).mandatory().build(),
-                DisplayableFieldBuilder.create(DATE_RANGE, Type.TEXT).build()
+                DisplayableFieldBuilder.create(EMPLOYEE, Type.TEXT).build(),
+                DisplayableFieldBuilder.create(OFFICE, Type.TEXT).build(),
+                DisplayableFieldBuilder.create(DATE_RANGE, Type.DATE).build()
         );
 
+    }
+
+    private List<QueryParameter> buildQueryParameters() {
+        return Arrays.asList(
+                QueryParameterBuilder.create(DATE_RANGE, Type.DATE).operator(QueryParameter.Operator.BETWEEN).build(),
+                QueryParameterBuilder.create(STATE, Type.TEXT).operator(QueryParameter.Operator.IN).build()
+        );
     }
 
 
