@@ -154,7 +154,7 @@ public class TellerTransactionReportSpecification implements ReportSpecification
     }
 
 
-    private List<Row> buildRows(ReportRequest reportRequest, List<?> tellerResultList) {
+    private List<Row> buildRows(final ReportRequest reportRequest, final List<?> tellerResultList) {
         final ArrayList<Row> rows = new ArrayList<>();
 
         tellerResultList.forEach(result -> {

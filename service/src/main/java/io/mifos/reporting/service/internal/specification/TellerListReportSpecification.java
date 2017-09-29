@@ -84,7 +84,7 @@ public class TellerListReportSpecification implements ReportSpecification {
 
         final Query tellerQuery = this.entityManager.createNativeQuery(this.buildTellerQuery(reportRequest, pageIndex, size));
         final List<?> tellerResultList =  tellerQuery.getResultList();
-        reportPage.setRows(this.buildRows(reportRequest, tellerResultList));
+        reportPage.setRows(this.buildRows(tellerResultList));
 
         reportPage.setHasMore(
                 !this.entityManager.createNativeQuery(this.buildTellerQuery(reportRequest, pageIndex + 1, size))
@@ -140,7 +140,7 @@ public class TellerListReportSpecification implements ReportSpecification {
         return header;
     }
 
-    private List<Row> buildRows(ReportRequest reportRequest, List<?> tellerResultList) {
+    private List<Row> buildRows(final List<?> tellerResultList) {
         final ArrayList<Row> rows = new ArrayList<>();
         tellerResultList.forEach(result -> {
             final Row row = new Row();

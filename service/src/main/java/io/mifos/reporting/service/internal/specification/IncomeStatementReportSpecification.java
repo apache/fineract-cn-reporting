@@ -41,9 +41,7 @@ public class IncomeStatementReportSpecification implements ReportSpecification {
     private static final String TYPE = "Type";
     private static final String IDENTIFIER = "Identifier";
     private static final String NAME = "Name";
-    private static final String HOLDER = "Holder";
     private static final String BALANCE = "Balance";
-    private static final String STATE = "State";
 
     private final Logger logger;
 
@@ -123,9 +121,7 @@ public class IncomeStatementReportSpecification implements ReportSpecification {
         this.accountColumnMapping.put(TYPE, "acc.a_type");
         this.accountColumnMapping.put(IDENTIFIER, "acc.identifier");
         this.accountColumnMapping.put(NAME, "acc.a_name");
-        this.accountColumnMapping.put(HOLDER, "acc.holders");
         this.accountColumnMapping.put(BALANCE, "acc.balance");
-        this.accountColumnMapping.put(STATE, "acc.a_state");
 
         this.allColumnMapping.putAll(accountColumnMapping);
     }
@@ -290,16 +286,11 @@ public class IncomeStatementReportSpecification implements ReportSpecification {
                 DisplayableFieldBuilder.create(TYPE, Type.TEXT).mandatory().build(),
                 DisplayableFieldBuilder.create(IDENTIFIER, Type.TEXT).mandatory().build(),
                 DisplayableFieldBuilder.create(NAME, Type.TEXT).mandatory().build(),
-                //DisplayableFieldBuilder.create(HOLDER, Type.TEXT).build(),
                 DisplayableFieldBuilder.create(BALANCE, Type.TEXT).mandatory().build()
-               // DisplayableFieldBuilder.create(STATE, Type.TEXT).mandatory().build()
         );
     }
 
     private List<QueryParameter> buildQueryParameters() {
-        return Arrays.asList(
-               // QueryParameterBuilder.create(DATE_RANGE, Type.DATE).operator(QueryParameter.Operator.BETWEEN).build(),
-                //QueryParameterBuilder.create(STATE, Type.TEXT).operator(QueryParameter.Operator.IN).build()
-        );
+        return Arrays.asList();
     }
 }

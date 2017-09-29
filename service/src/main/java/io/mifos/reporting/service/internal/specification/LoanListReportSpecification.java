@@ -274,10 +274,7 @@ public class LoanListReportSpecification implements ReportSpecification {
     }
 
     private List<QueryParameter> buildQueryParameters() {
-        return Arrays.asList(
-                //QueryParameterBuilder.create(DATE_RANGE, Type.DATE).operator(QueryParameter.Operator.BETWEEN).build()
-                //QueryParameterBuilder.create(LOAN_STATE, Type.TEXT).operator(QueryParameter.Operator.IN).build()
-        );
+        return Arrays.asList();
     }
 
     private String buildCustomerQuery(final ReportRequest reportRequest, int pageIndex, int size){

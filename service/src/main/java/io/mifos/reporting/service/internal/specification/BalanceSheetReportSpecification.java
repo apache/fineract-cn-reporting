@@ -41,9 +41,7 @@ public class BalanceSheetReportSpecification implements ReportSpecification {
     private static final String TYPE = "Type";
     private static final String IDENTIFIER = "Identifier";
     private static final String NAME = "Name";
-    private static final String HOLDER = "Holder";
     private static final String BALANCE = "Balance";
-    private static final String STATE = "State";
 
     private final Logger logger;
 
@@ -123,9 +121,7 @@ public class BalanceSheetReportSpecification implements ReportSpecification {
         this.accountingColumnMapping.put(TYPE, "acc.a_type");
         this.accountingColumnMapping.put(IDENTIFIER, "acc.identifier");
         this.accountingColumnMapping.put(NAME, "acc.a_name");
-        this.accountingColumnMapping.put(HOLDER, "acc.holders");
         this.accountingColumnMapping.put(BALANCE, "acc.balance");
-        this.accountingColumnMapping.put(STATE, "acc.a_state");
 
         this.allColumnMapping.putAll(accountingColumnMapping);
     }
