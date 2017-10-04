@@ -33,28 +33,30 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
+@Report(category = "Organization", identifier = "Office")
+public class OfficeListReportSpecification implements ReportSpecification {
 
-@Report(category = "Teller" , identifier = "Listing")
-public class TellerListReportSpecification implements ReportSpecification {
-
-    private static final String TELLER = "Teller";
-    private static final String EMPLOYEE = "Employee";
-    private static final String OFFICE = "Office";
-    private static final String CASHDRAW_LIMIT = "Cashdraw limit";
-    private static final String STATE = "State";
-    private static final String DATE_RANGE = "Date";
+    private static final String OFFICE = "Identifier";
+    private static final String OFFICE_NAME = "Office";
+    private static final String DESCRIPTION = "Description";
+    private static final String CREATED_BY = "Created By";
+   // private static final String STREET = "Street";
+    //private static final String CITY = "City";
+   // private static final String REGION = "Region";
+   // private static final String POSTAL_CODE = "Postal Code";
+   // private static final String COUNTRY = "Country";
+    private static final String ADDRESS = "Address";
 
     private final Logger logger;
 
     private final EntityManager entityManager;
-
-    private final HashMap<String, String> tellerColumnMapping = new HashMap<>();
+    private final HashMap<String, String> officeColumnMapping = new HashMap<>();
+    private final HashMap<String, String> addressColumnMapping = new HashMap<>();
     private final HashMap<String, String> allColumnMapping = new HashMap<>();
 
-
     @Autowired
-    public TellerListReportSpecification(@Qualifier(ServiceConstants.LOGGER_NAME) final Logger logger,
-                                         final EntityManager entityManager) {
+    public OfficeListReportSpecification(@Qualifier(ServiceConstants.LOGGER_NAME) final Logger logger,
+                                           final EntityManager entityManager) {
         super();
         this.logger = logger;
         this.entityManager = entityManager;
@@ -64,16 +66,16 @@ public class TellerListReportSpecification implements ReportSpecification {
     @Override
     public ReportDefinition getReportDefinition() {
         final ReportDefinition reportDefinition = new ReportDefinition();
-        reportDefinition.setIdentifier("Listing");
-        reportDefinition.setName("Teller Listing");
-        reportDefinition.setDescription("List of all Tellers.");
+        reportDefinition.setIdentifier("Office");
+        reportDefinition.setName("Office Listing");
+        reportDefinition.setDescription("List of all Offices.");
         reportDefinition.setQueryParameters(this.buildQueryParameters());
         reportDefinition.setDisplayableFields(this.buildDisplayableFields());
         return reportDefinition;
     }
 
     @Override
-    public ReportPage generateReport(ReportRequest reportRequest, int pageIndex, int size) {
+    public ReportPage generateReport(final ReportRequest reportRequest, final int pageIndex, final int size) {
         final ReportDefinition reportDefinition = this.getReportDefinition();
         this.logger.info("Generating report {0}.", reportDefinition.getIdentifier());
 
@@ -82,12 +84,12 @@ public class TellerListReportSpecification implements ReportSpecification {
         reportPage.setDescription(reportDefinition.getDescription());
         reportPage.setHeader(this.createHeader(reportRequest.getDisplayableFields()));
 
-        final Query tellerQuery = this.entityManager.createNativeQuery(this.buildTellerQuery(reportRequest, pageIndex, size));
-        final List<?> tellerResultList =  tellerQuery.getResultList();
-        reportPage.setRows(this.buildRows(tellerResultList));
+        final Query customerQuery = this.entityManager.createNativeQuery(this.buildOfficeQuery(reportRequest, pageIndex, size));
+        final List<?> customerResultList =  customerQuery.getResultList();
+        reportPage.setRows(this.buildRows(reportRequest, customerResultList));
 
         reportPage.setHasMore(
-                !this.entityManager.createNativeQuery(this.buildTellerQuery(reportRequest, pageIndex + 1, size))
+                !this.entityManager.createNativeQuery(this.buildOfficeQuery(reportRequest, pageIndex + 1, size))
                         .getResultList().isEmpty()
         );
 
@@ -119,17 +121,20 @@ public class TellerListReportSpecification implements ReportSpecification {
     }
 
     private void initializeMapping() {
-        this.tellerColumnMapping.put(TELLER, "tl.identifier");
-        this.tellerColumnMapping.put(OFFICE, "tl.office_identifier");
-        this.tellerColumnMapping.put(CASHDRAW_LIMIT, "tl.cashdraw_limit");
-        this.tellerColumnMapping.put(EMPLOYEE, "tl.assigned_employee_identifier");
-        this.tellerColumnMapping.put(STATE, "tl.a_state");
-        this.tellerColumnMapping.put(DATE_RANGE, "tl.created_on");
+        this.officeColumnMapping.put(OFFICE, "ho.id");
+        this.officeColumnMapping.put(OFFICE_NAME, "ho.a_name");
+        this.officeColumnMapping.put(DESCRIPTION, "ho.description");
+        this.officeColumnMapping.put(CREATED_BY, "ho.created_by");
 
-        this.allColumnMapping.putAll(tellerColumnMapping);
+        this.addressColumnMapping.put(ADDRESS, "CONCAT(IFNULL(ha.street, ', '), " +
+                "IFNULL(ha.postal_code, ', '), IFNULL(ha.city, ', ')," +
+                " IFNULL(ha.region, ', '), IFNULL(ha.country, ','))");
+
+        this.allColumnMapping.putAll(officeColumnMapping);
+        this.allColumnMapping.putAll(addressColumnMapping);
     }
 
-    private Header createHeader(List<DisplayableField> displayableFields) {
+    private Header createHeader(final List<DisplayableField> displayableFields) {
         final Header header = new Header();
         header.setColumnNames(
                 displayableFields
@@ -140,62 +145,77 @@ public class TellerListReportSpecification implements ReportSpecification {
         return header;
     }
 
-    private List<Row> buildRows(final List<?> tellerResultList) {
+    private List<QueryParameter> buildQueryParameters() {
+        return Arrays.asList(
+                //QueryParameterBuilder.create(DATE_RANGE, Type.DATE).operator(QueryParameter.Operator.BETWEEN).build(),
+                //QueryParameterBuilder.create(STATE, Type.TEXT).operator(QueryParameter.Operator.IN).build()
+        );
+    }
+
+    private List<DisplayableField> buildDisplayableFields() {
+        return Arrays.asList(
+                DisplayableFieldBuilder.create(OFFICE, Type.TEXT).mandatory().build(),
+                DisplayableFieldBuilder.create(OFFICE_NAME, Type.TEXT).mandatory().build(),
+                DisplayableFieldBuilder.create(DESCRIPTION, Type.TEXT).mandatory().build(),
+                DisplayableFieldBuilder.create(CREATED_BY, Type.TEXT).build(),
+                DisplayableFieldBuilder.create(ADDRESS, Type.TEXT).mandatory().build()
+        );
+    }
+
+    private List<Row> buildRows(final ReportRequest reportRequest, final List<?> officeResultList) {
         final ArrayList<Row> rows = new ArrayList<>();
-        tellerResultList.forEach(result -> {
+
+        officeResultList.forEach(result -> {
             final Row row = new Row();
             row.setValues(new ArrayList<>());
-            
+
+            final String officeIdentifier;
+
             if (result instanceof Object[]) {
                 final Object[] resultValues = (Object[]) result;
 
-                for(final Object resultVal : resultValues) {
-                    final Value val;
-                    val = new Value();
+                officeIdentifier = resultValues[0].toString();
 
-                    if (resultVal != null) {
-                        val.setValues(new String[]{resultVal.toString()});
+                for (final Object resultValue : resultValues) {
+                    final Value value = new Value();
+                    if (resultValue != null) {
+                        value.setValues(new String[]{resultValue.toString()});
                     } else {
-                        val.setValues(new String[]{});
+                        value.setValues(new String[]{});
                     }
 
-                    row.getValues().add(val);
+                    row.getValues().add(value);
                 }
             } else {
+                officeIdentifier = result.toString();
+
                 final Value value = new Value();
                 value.setValues(new String[]{result.toString()});
                 row.getValues().add(value);
             }
+
+            final String addressQueryString = this.buildAddressQuery(reportRequest, officeIdentifier);
+            if (addressQueryString != null) {
+                final Query addressQuery = this.entityManager.createNativeQuery(addressQueryString);
+                final List<?> resultList = addressQuery.getResultList();
+                final Value addressValue = new Value();
+                addressValue.setValues(new String[]{resultList.get(0).toString()});
+                row.getValues().add(addressValue);
+            }
+
             rows.add(row);
         });
 
         return rows;
     }
 
-    private List<QueryParameter> buildQueryParameters() {
-        return Arrays.asList(
-                QueryParameterBuilder.create(DATE_RANGE, Type.DATE).operator(QueryParameter.Operator.BETWEEN).build(),
-                QueryParameterBuilder.create(STATE, Type.TEXT).operator(QueryParameter.Operator.IN).build()
-        );
-    }
-
-    private List<DisplayableField> buildDisplayableFields() {
-        return Arrays.asList(
-                DisplayableFieldBuilder.create(TELLER, Type.TEXT).mandatory().build(),
-                DisplayableFieldBuilder.create(OFFICE, Type.TEXT).build(),
-                DisplayableFieldBuilder.create(EMPLOYEE, Type.TEXT).build(),
-                DisplayableFieldBuilder.create(CASHDRAW_LIMIT, Type.TEXT).build(),
-                DisplayableFieldBuilder.create(STATE, Type.TEXT).build()
-        );
-    }
-
-    private String buildTellerQuery(ReportRequest reportRequest, int pageIndex, int size) {
+    private String buildOfficeQuery(final ReportRequest reportRequest, int pageIndex, int size) {
         final StringBuilder query = new StringBuilder("SELECT ");
 
         final List<DisplayableField> displayableFields = reportRequest.getDisplayableFields();
         final ArrayList<String> columns = new ArrayList<>();
         displayableFields.forEach(displayableField -> {
-            final String column = this.tellerColumnMapping.get(displayableField.getName());
+            final String column = this.officeColumnMapping.get(displayableField.getName());
             if (column != null) {
                 columns.add(column);
             }
@@ -203,7 +223,7 @@ public class TellerListReportSpecification implements ReportSpecification {
 
         query.append(columns.stream().collect(Collectors.joining(", ")))
                 .append(" FROM ")
-                .append("tajet_teller tl ");
+                .append("horus_offices ho ");
 
         final List<QueryParameter> queryParameters = reportRequest.getQueryParameters();
         if (!queryParameters.isEmpty()) {
@@ -211,7 +231,7 @@ public class TellerListReportSpecification implements ReportSpecification {
             queryParameters.forEach(queryParameter -> {
                 if(queryParameter.getValue() != null && !queryParameter.getValue().isEmpty()) {
                     criteria.add(
-                            CriteriaBuilder.buildCriteria(this.tellerColumnMapping.get(queryParameter.getName()), queryParameter)
+                            CriteriaBuilder.buildCriteria(this.officeColumnMapping.get(queryParameter.getName()), queryParameter)
                     );
                 }
             });
@@ -222,7 +242,7 @@ public class TellerListReportSpecification implements ReportSpecification {
             }
 
         }
-        query.append(" ORDER BY tl.identifier");
+        query.append(" ORDER BY ho.a_name");
 
         query.append(" LIMIT ");
         query.append(size);
@@ -233,4 +253,26 @@ public class TellerListReportSpecification implements ReportSpecification {
 
         return query.toString();
     }
+
+    private String buildAddressQuery(final ReportRequest reportRequest, final String officeIdentifier) {
+
+        final List<DisplayableField> displayableFields = reportRequest.getDisplayableFields();
+        final ArrayList<String> columns = new ArrayList<>();
+        displayableFields.forEach(displayableField -> {
+            final String column = this.addressColumnMapping.get(displayableField.getName());
+            if (column != null) {
+                columns.add(column);
+            }
+        });
+
+        if (!columns.isEmpty()) {
+            return "SELECT " + columns.stream().collect(Collectors.joining(", ")) + " " +
+                    "FROM horus_addresses ha " +
+                    "LEFT JOIN horus_offices ho on ha.office_id = ho.id " +
+                    "WHERE ho.id ='" + officeIdentifier + "' ";
+        }
+        return null;
+    }
 }
+
+
