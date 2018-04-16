@@ -18,16 +18,19 @@
  */
 package io.mifos.reporting.service.internal.specification;
 
-import io.mifos.core.api.util.UserContextHolder;
-import io.mifos.core.lang.DateConverter;
-import io.mifos.reporting.api.v1.domain.*;
+import io.mifos.reporting.api.v1.domain.DisplayableField;
+import io.mifos.reporting.api.v1.domain.Header;
+import io.mifos.reporting.api.v1.domain.QueryParameter;
+import io.mifos.reporting.api.v1.domain.ReportDefinition;
+import io.mifos.reporting.api.v1.domain.ReportPage;
+import io.mifos.reporting.api.v1.domain.ReportRequest;
+import io.mifos.reporting.api.v1.domain.Row;
+import io.mifos.reporting.api.v1.domain.Type;
+import io.mifos.reporting.api.v1.domain.Value;
 import io.mifos.reporting.service.ServiceConstants;
-import io.mifos.reporting.service.spi.*;
-import org.slf4j.Logger;
-import org.springframework.beans.factory.annotation.Qualifier;
-
-import javax.persistence.EntityManager;
-import javax.persistence.Query;
+import io.mifos.reporting.service.spi.DisplayableFieldBuilder;
+import io.mifos.reporting.service.spi.Report;
+import io.mifos.reporting.service.spi.ReportSpecification;
 import java.math.BigDecimal;
 import java.time.Clock;
 import java.time.LocalDateTime;
@@ -36,6 +39,12 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
+import javax.persistence.EntityManager;
+import javax.persistence.Query;
+import org.apache.fineract.cn.api.util.UserContextHolder;
+import org.apache.fineract.cn.lang.DateConverter;
+import org.slf4j.Logger;
+import org.springframework.beans.factory.annotation.Qualifier;
 
 @Report(category = "Accounting", identifier = "Incomestatement")
 public class IncomeStatementReportSpecification implements ReportSpecification {

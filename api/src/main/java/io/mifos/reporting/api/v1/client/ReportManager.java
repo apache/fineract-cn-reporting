@@ -18,25 +18,21 @@
  */
 package io.mifos.reporting.api.v1.client;
 
-import io.mifos.core.api.annotation.ThrowsException;
-import io.mifos.core.api.annotation.ThrowsExceptions;
-import io.mifos.core.api.util.CustomFeignClientsConfiguration;
-import io.mifos.core.lang.ServiceException;
-import io.mifos.reporting.api.v1.PermittableGroupIds;
 import io.mifos.reporting.api.v1.domain.ReportDefinition;
 import io.mifos.reporting.api.v1.domain.ReportPage;
 import io.mifos.reporting.api.v1.domain.ReportRequest;
+import java.util.List;
+import org.apache.fineract.cn.api.annotation.ThrowsException;
+import org.apache.fineract.cn.api.annotation.ThrowsExceptions;
+import org.apache.fineract.cn.api.util.CustomFeignClientsConfiguration;
 import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-
-import java.util.List;
 
 @SuppressWarnings("unused")
 @FeignClient(value="reporting-v1", path="/reporting/v1", configuration = CustomFeignClientsConfiguration.class)

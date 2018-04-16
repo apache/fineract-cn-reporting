@@ -18,8 +18,6 @@
  */
 package io.mifos.reporting.service.internal.specification;
 
-import io.mifos.core.api.util.UserContextHolder;
-import io.mifos.core.lang.DateConverter;
 import io.mifos.reporting.api.v1.domain.DisplayableField;
 import io.mifos.reporting.api.v1.domain.Header;
 import io.mifos.reporting.api.v1.domain.QueryParameter;
@@ -35,12 +33,6 @@ import io.mifos.reporting.service.spi.DisplayableFieldBuilder;
 import io.mifos.reporting.service.spi.QueryParameterBuilder;
 import io.mifos.reporting.service.spi.Report;
 import io.mifos.reporting.service.spi.ReportSpecification;
-import org.slf4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-
-import javax.persistence.EntityManager;
-import javax.persistence.Query;
 import java.text.DecimalFormat;
 import java.time.Clock;
 import java.time.LocalDateTime;
@@ -49,6 +41,13 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
+import javax.persistence.EntityManager;
+import javax.persistence.Query;
+import org.apache.fineract.cn.api.util.UserContextHolder;
+import org.apache.fineract.cn.lang.DateConverter;
+import org.slf4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 
 @Report(category = "Customer", identifier = "Listing")
 public class CustomerListReportSpecification implements ReportSpecification {

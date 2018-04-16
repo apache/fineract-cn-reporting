@@ -18,15 +18,16 @@
  */
 package io.mifos.reporting;
 
-import io.mifos.anubis.test.v1.TenantApplicationSecurityEnvironmentTestRule;
-import io.mifos.core.api.context.AutoUserContext;
-import io.mifos.core.lang.ApplicationName;
-import io.mifos.core.test.env.TestEnvironment;
-import io.mifos.core.test.fixture.TenantDataStoreContextTestRule;
-import io.mifos.core.test.fixture.cassandra.CassandraInitializer;
-import io.mifos.core.test.fixture.mariadb.MariaDBInitializer;
 import io.mifos.reporting.api.v1.client.ReportManager;
 import io.mifos.reporting.service.ReportingConfiguration;
+import java.security.interfaces.RSAPrivateKey;
+import org.apache.fineract.cn.anubis.test.v1.TenantApplicationSecurityEnvironmentTestRule;
+import org.apache.fineract.cn.api.context.AutoUserContext;
+import org.apache.fineract.cn.lang.ApplicationName;
+import org.apache.fineract.cn.test.env.TestEnvironment;
+import org.apache.fineract.cn.test.fixture.TenantDataStoreContextTestRule;
+import org.apache.fineract.cn.test.fixture.cassandra.CassandraInitializer;
+import org.apache.fineract.cn.test.fixture.mariadb.MariaDBInitializer;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.ClassRule;
@@ -45,8 +46,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit4.SpringRunner;
-
-import java.security.interfaces.RSAPrivateKey;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(
