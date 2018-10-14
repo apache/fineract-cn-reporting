@@ -52,7 +52,7 @@ import org.springframework.test.context.junit4.SpringRunner;
     webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT,
     classes = {AbstractReportingSpecificationTest.TestConfiguration.class}
 )
-public class AbstractReportingSpecificationTest {
+public class AbstractReportingSpecificationTest extends SuiteTestEnvironment {
   private static final String APP_NAME = "reporting-v1";
   public static final String LOGGER_NAME = "test-logger";
 
