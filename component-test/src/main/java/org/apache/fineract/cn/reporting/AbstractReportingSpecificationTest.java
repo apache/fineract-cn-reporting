@@ -23,17 +23,10 @@ import org.apache.fineract.cn.reporting.service.ReportingConfiguration;
 import java.security.interfaces.RSAPrivateKey;
 import org.apache.fineract.cn.anubis.test.v1.TenantApplicationSecurityEnvironmentTestRule;
 import org.apache.fineract.cn.api.context.AutoUserContext;
-import org.apache.fineract.cn.lang.ApplicationName;
-import org.apache.fineract.cn.test.env.TestEnvironment;
-import org.apache.fineract.cn.test.fixture.TenantDataStoreContextTestRule;
-import org.apache.fineract.cn.test.fixture.cassandra.CassandraInitializer;
-import org.apache.fineract.cn.test.fixture.mariadb.MariaDBInitializer;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.ClassRule;
+
 import org.junit.Rule;
-import org.junit.rules.RuleChain;
-import org.junit.rules.TestRule;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -71,20 +64,6 @@ public class AbstractReportingSpecificationTest extends SuiteTestEnvironment {
     }
   }
 
-  static final String TEST_USER = "homer";
-
-  private final static TestEnvironment testEnvironment = new TestEnvironment(APP_NAME);
-  private final static CassandraInitializer cassandraInitializer = new CassandraInitializer();
-  private final static MariaDBInitializer mariaDBInitializer = new MariaDBInitializer();
-  final static TenantDataStoreContextTestRule tenantDataStoreContext = TenantDataStoreContextTestRule.forRandomTenantName(cassandraInitializer, mariaDBInitializer);
-
-  @ClassRule
-  public static TestRule orderClassRules = RuleChain
-      .outerRule(testEnvironment)
-      .around(cassandraInitializer)
-      .around(mariaDBInitializer)
-      .around(tenantDataStoreContext);
-
   @Rule
   public final TenantApplicationSecurityEnvironmentTestRule tenantApplicationSecurityEnvironment
       = new TenantApplicationSecurityEnvironmentTestRule(testEnvironment, this::waitForInitialize);
@@ -93,9 +72,6 @@ public class AbstractReportingSpecificationTest extends SuiteTestEnvironment {
 
   @Autowired
   ReportManager testSubject;
-
-  @Autowired
-  private ApplicationName applicationName;
 
   @Autowired
   @Qualifier(LOGGER_NAME)

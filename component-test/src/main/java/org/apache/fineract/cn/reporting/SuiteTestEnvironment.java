@@ -19,22 +19,26 @@
 package org.apache.fineract.cn.reporting;
 
 import org.apache.fineract.cn.test.env.TestEnvironment;
+import org.apache.fineract.cn.test.fixture.TenantDataStoreContextTestRule;
 import org.apache.fineract.cn.test.fixture.cassandra.CassandraInitializer;
 import org.apache.fineract.cn.test.fixture.mariadb.MariaDBInitializer;
 import org.junit.ClassRule;
 import org.junit.rules.RuleChain;
-import org.junit.rules.RunExternalResourceOnce;
 import org.junit.rules.TestRule;
 
 public class SuiteTestEnvironment {
   static final String APP_NAME = "reporting-v1";
-  static final TestEnvironment testEnvironment = new TestEnvironment(APP_NAME);
-  static final CassandraInitializer cassandraInitializer = new CassandraInitializer();
-  static final MariaDBInitializer mariaDBInitializer = new MariaDBInitializer();
+  static final String TEST_USER = "shu";
+
+  public final static TestEnvironment testEnvironment = new TestEnvironment(APP_NAME);
+  private final static CassandraInitializer cassandraInitializer = new CassandraInitializer();
+  private final static MariaDBInitializer mariaDBInitializer = new MariaDBInitializer();
+  final static TenantDataStoreContextTestRule tenantDataStoreContext = TenantDataStoreContextTestRule.forRandomTenantName(cassandraInitializer, mariaDBInitializer);
 
   @ClassRule
   public static TestRule orderClassRules = RuleChain
-          .outerRule(new RunExternalResourceOnce(testEnvironment))
-          .around(new RunExternalResourceOnce(cassandraInitializer))
-          .around(new RunExternalResourceOnce(mariaDBInitializer));
+          .outerRule(testEnvironment)
+          .around(cassandraInitializer)
+          .around(mariaDBInitializer)
+          .around(tenantDataStoreContext);
 }
