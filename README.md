@@ -1,4 +1,4 @@
-# Apache Fineract CN Reporting
+# Apache Fineract CN Reporting [![Build Status](https://api.travis-ci.com/apache/fineract-cn-reporting.svg?branch=develop)](https://travis-ci.com/apache/fineract-cn-reporting)
 
 This project provides simple reporting capabilities.
 
