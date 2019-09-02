@@ -16,14 +16,7 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-FROM openjdk:8-jdk-alpine AS builder
-RUN mkdir builddir
-COPY . builddir
-WORKDIR builddir
-RUN ./gradlew publishToMavenLocal
-
-
-FROM openjdk:8-jdk-alpine AS runner
+FROM openjdk:8-jdk-alpine
 
 ARG reporting_port=2029
 
@@ -32,7 +25,7 @@ ENV server.max-http-header-size=16384 \
     server.port=$reporting_port
 
 WORKDIR /tmp
-COPY --from=builder /builddir/service/build/libs/service-0.1.0-BUILD-SNAPSHOT-boot.jar ./reporting-service-boot.jar
+COPY reporting-service-boot-0.1.0-BUILD-SNAPSHOT.jar .
 ENV server.port=$reporting_port
 
-CMD ["java", "-jar", "reporting-service-boot.jar"]
+CMD ["java", "-jar", "reporting-service-boot-0.1.0-BUILD-SNAPSHOT.jar"]
