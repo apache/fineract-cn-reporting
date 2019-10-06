@@ -1,6 +1,7 @@
-# Apache Fineract CN Reporting [![Build Status](https://api.travis-ci.com/apache/fineract-cn-reporting.svg?branch=develop)](https://travis-ci.com/apache/fineract-cn-reporting)
+# Apache Fineract CN Reporting [![Build Status](https://api.travis-ci.com/apache/fineract-cn-reporting.svg?branch=develop)](https://travis-ci.com/apache/fineract-cn-reporting) [![Docker Cloud Build Status](https://img.shields.io/docker/cloud/build/apache/fineract-cn-reporting)](https://hub.docker.com/r/apache/fineract-cn-reporting/builds)
 
 This project provides simple reporting capabilities.
+[Read more](https://cwiki.apache.org/confluence/display/FINERACT/Fineract+CN+Project+Structure#FineractCNProjectStructure-reporting).
 
 ## Versioning
 The version numbers follow the [Semantic Versioning](http://semver.org/) scheme.
