@@ -32,7 +32,7 @@ ENV server.max-http-header-size=16384 \
     server.port=$reporting_port
 
 WORKDIR /tmp
-COPY --from=builder /builddir/service/build/libs/service-0.1.0-BUILD-SNAPSHOT-boot.jar ./reporting-service-boot.jar
+COPY --from=builder /builddir/service/build/libs/service-0.1.x-SNAPSHOT-boot.jar ./reporting-service-boot.jar
 ENV server.port=$reporting_port
 
 CMD ["java", "-jar", "reporting-service-boot.jar"]
