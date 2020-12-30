@@ -33,8 +33,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
-import org.springframework.web.servlet.config.annotation.PathMatchConfigurer;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @SuppressWarnings("WeakerAccess")
 @Configuration
@@ -53,7 +52,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
     "org.apache.fineract.cn.reporting.service.rest",
     "org.apache.fineract.cn.reporting.service.internal"
 })
-public class ReportingConfiguration extends WebMvcConfigurerAdapter {
+public class ReportingConfiguration implements WebMvcConfigurer {
 
   public ReportingConfiguration() {
     super();
@@ -64,8 +63,4 @@ public class ReportingConfiguration extends WebMvcConfigurerAdapter {
     return LoggerFactory.getLogger(ServiceConstants.LOGGER_NAME);
   }
 
-  @Override
-  public void configurePathMatch(final PathMatchConfigurer configurer) {
-    configurer.setUseSuffixPatternMatch(Boolean.FALSE);
-  }
 }
