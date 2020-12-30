@@ -17,7 +17,7 @@
 
 buildscript {
     ext {
-        springBootVersion = '2.2.6.RELEASE'
+        springBootVersion = '2.4.1'
     }
     repositories {
         jcenter()
@@ -28,8 +28,8 @@ plugins {
     id 'com.github.hierynomus.license' version '0.15.0'
     id 'org.nosphere.apache.rat' version '0.6.0'
     id 'com.jfrog.artifactory' version '4.15.1'
-    id "io.spring.dependency-management" version "1.0.9.RELEASE"
-    id 'org.springframework.boot' version '2.2.6.RELEASE'
+    id "io.spring.dependency-management" version "1.0.10.RELEASE"
+    id 'org.springframework.boot' version '2.4.1'
     id 'maven-publish'
     id 'java'
     id 'idea'
@@ -39,11 +39,11 @@ apply from: '../shared.gradle'
 
 bootJar {
     enabled = true
-    classifier = 'boot'
+    archiveClassifier = 'boot'
 }
 
 dependencies {
-    compile(
+    implementation(
             [group: 'org.springframework.cloud', name: 'spring-cloud-starter-config'],
             [group: 'org.springframework.cloud', name: 'spring-cloud-starter-netflix-eureka-client'],
             [group: 'org.springframework.boot', name: 'spring-boot-starter-jetty'],
@@ -53,12 +53,12 @@ dependencies {
             [group: 'org.apache.fineract.cn', name: 'lang', version: versions.frameworklang],
             [group: 'org.apache.fineract.cn', name: 'async', version: versions.frameworkasync],
             [group: 'org.apache.fineract.cn', name: 'cassandra', version: versions.frameworkcassandra],
-            [group: 'org.apache.fineract.cn', name: 'postgresql', version: '0.1.0-BUILD-SNAPSHOT'],
+            [group: 'org.apache.fineract.cn', name: 'postgresql', version: versions.frameworkpostgresql],
             [group: 'org.apache.fineract.cn', name: 'command', version: versions.frameworkcommand],
-            [group: 'org.hibernate', name: 'hibernate-validator', version: versions.validator],
-            [group: 'org.owasp.esapi', name: 'esapi', version: '2.1.0.1'],
-            [group: 'io.netty', name: 'netty-all', version: '4.1.39.Final'],
-            [group: 'io.netty', name: 'netty-transport-native-epoll', version: '4.1.39.Final']
+            [group: 'org.hibernate.validator', name: 'hibernate-validator', version: versions.hibernatevalidator],
+            [group: 'org.owasp.esapi', name: 'esapi', version: '2.2.2.0'],
+            [group: 'io.netty', name: 'netty-all', version: '4.1.55.Final'],
+            [group: 'io.netty', name: 'netty-transport-native-epoll', version: '4.1.55.Final']
     )
 }
 
@@ -80,7 +80,7 @@ publishing {
         }
         bootService(MavenPublication) {
             // "boot" jar
-            artifact(file("$buildDir/libs/$project.name-$project.version-${bootJar.classifier}.jar"))
+            artifact(file("$buildDir/libs/$project.name-$project.version-${bootJar.archiveClassifier}.jar"))
             groupId project.group
             artifactId ("$project.name-boot")
             version project.findProperty('externalVersion') ?: project.version
