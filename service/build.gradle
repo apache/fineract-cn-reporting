@@ -39,7 +39,7 @@ apply from: '../shared.gradle'
 
 bootJar {
     enabled = true
-    archiveClassifier = 'boot'
+    classifier = 'boot'
 }
 
 dependencies {
@@ -80,7 +80,7 @@ publishing {
         }
         bootService(MavenPublication) {
             // "boot" jar
-            artifact(file("$buildDir/libs/$project.name-$project.version-${bootJar.archiveClassifier}.jar"))
+            artifact(file("$buildDir/libs/$project.name-$project.version-${bootJar.classifier}.jar"))
             groupId project.group
             artifactId ("$project.name-boot")
             version project.findProperty('externalVersion') ?: project.version
