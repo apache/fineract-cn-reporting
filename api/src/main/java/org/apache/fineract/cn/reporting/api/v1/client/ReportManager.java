@@ -35,7 +35,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
 @SuppressWarnings("unused")
-@FeignClient(value="reporting-v1", path="/reporting/v1", configuration = CustomFeignClientsConfiguration.class)
+@FeignClient(path="/reporting/v1", url = "http://${kubernetes.reporting.service.name}:${kubernetes.reporting.server.port}", configuration = CustomFeignClientsConfiguration.class)
 public interface ReportManager {
 
   @RequestMapping(
