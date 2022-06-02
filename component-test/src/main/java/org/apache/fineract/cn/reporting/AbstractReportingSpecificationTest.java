@@ -51,7 +51,6 @@ public class AbstractReportingSpecificationTest extends SuiteTestEnvironment {
 
   @Configuration
   @EnableFeignClients(basePackages = {"org.apache.fineract.cn.reporting.api.v1.client"})
-  @RibbonClient(name = APP_NAME)
   @Import({ReportingConfiguration.class})
   public static class TestConfiguration {
     public TestConfiguration() {
